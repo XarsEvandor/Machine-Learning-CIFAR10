@@ -470,4 +470,83 @@
 
 * ### The increase of the learning rate did get the network out of the local minima by dipping the accuracy by 5%. It then recovered back to 85.9%
 
+## Concluding experiments using best performing parameters.
+* <details><summary>Architecture</summary>
+    <p>
 
+        ```python
+        oCommonModuleConfig={  "Convolution.Features"           : None 
+                              ,"Convolution.PaddingSize"        : 1
+                              ,"Convolution.WindowSize"         : 3
+                              ,"Convolution.Stride"             : 1
+                              ,"Convolution.KernelInitializer"  : "glorot_uniform"
+                              ,"Convolution.HasBias"            : False
+                              ,"Convolution.BiasInitializer"    : None
+                              ,"Convolution.RegularizeL2"       : self.Config.Value["Training.RegularizeL2"]
+                              ,"Convolution.WeightDecay"        : self.Config.Value["Training.WeightDecay"]
+                              ,"ActivationFunction"             : "relu"
+                              ,"Normalization"                  : "BatchNormalization"
+                            }
+      
+        # ... = CBasicConvModule(self, oCommonModuleConfig, self.ConvLayerFeatures[3],p_bIsMaxPoolDownsampling=True)
+
+        self.Module1 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[0])
+        self.DropoutConv = layers.Dropout(rate = 0.4)                         #Make rate a self.Config.Value["CNN.DropoutProbability"]
+        self.Module2 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[1])
+        self.Module3 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[2],p_bIsMaxPoolDownsampling=True)
+        self.Module4 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[3],p_bIsMaxPoolDownsampling=True)
+        self.Module5 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[4])
+        ```
+
+    </p>
+    </details>
+
+* <details><summary>Hyperparameters</summary>
+    <p>
+
+        ```python
+        CONFIG_CUSTOM_CNN = {
+                 "ModelName": "CIFAR10_MyCustomCNN"
+                ,"CNN.InputShape": [32,32,3]
+                ,"CNN.Classes": 10
+                ,"CNN.ConvOutputFeatures": [32,32,64,128,256]
+                ,"Training.MaxEpoch": 50
+                ,"Training.BatchSize": 128
+                ,"Training.LearningRate": 0.05
+                ,"Training.LearningRateScheduling": [[20,0.01], [40,0.005]]
+                ,"Training.Momentum": 0.9
+                ,"Training.RegularizeL2": True
+                ,"Training.WeightDecay": 1e-4
+            }
+        ```
+
+    </p>
+    </details>
+
+* <details><summary>Augmentation</summary>
+    <p>
+
+        ```python
+        def PreprocessImageAugmentDataset(p_tImageInTS, p_tLabelInTS):
+            # Normalizes color component values from `uint8` to `float32`.
+            tNormalizedImage = __normalizeImage(p_tImageInTS)
+            # Calls the data augmentation function that add new random samples, i.e.augments the dataset. 
+            
+
+            # Resizes the image to 40x40 by padding with zeroes.
+            # tNewRandomImage = tf.image.pad_to_bounding_box(tNormalizedImage, 4, 4, 40, 40)
+
+            # # Randomly crops the image back to 32x32.
+            # tNewRandomImage = tf.image.random_crop(tNewRandomImage, [32, 32, 3])
+
+            # Flips the image randomly
+            tNewRandomImage = tf.image.random_flip_left_right(tNormalizedImage)
+            
+            # Target class labels into one-hot encoding
+            tTargetOneHot = tf.one_hot(p_tLabelInTS, CONFIG["CNN.Classes"])
+            
+            return tNewRandomImage, tTargetOneHot
+        ```
+
+    </p>
+    </details>
