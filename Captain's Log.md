@@ -550,3 +550,23 @@
 
     </p>
     </details>
+
+
+## Alternative architecture that has 85.6% accuracy but reduces features by 700,000.
+* <details><summary>Architecture</summary>
+    <p>
+
+        ```python
+        self.Module1 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[0])
+        self.DropoutConv = layers.Dropout(rate = 0.4)                         #Make rate a self.Config.Value["CNN.DropoutProbability"]
+        self.Module2 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[1])
+        self.Module3 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[2])
+        self.Module4 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[2],p_bIsMaxPoolDownsampling=True)
+        self.Module5 = CInceptionModule(self, oCommonModuleConfig, self.ConvLayerFeatures[3],p_bIsMaxPoolDownsampling=True)
+        self.Module6 = CBasicConvModule(self, oCommonModuleConfig, self.ConvLayerFeatures[3])
+        ```
+
+    </p>
+    </details>
+
+
